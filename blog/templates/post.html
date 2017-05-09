@@ -1,0 +1,12 @@
+{% for post in posts %}
+	<h1>{{ post.title }}</h1>
+	<subtitle>Author: {{ post.author }}, {{ post.updated }}</subtitle>
+
+	<p>{{ post.text }}</p>
+
+	<p>Tags: {% for slug in post.slugs %}
+	{{ slug }}
+	{% endfor %}
+	</p>
+	}
+{% endfor %}
