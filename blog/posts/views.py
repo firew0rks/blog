@@ -1,7 +1,7 @@
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponse
 from django.template import RequestContext
-from .models import Post
+from .models import Post, PostTag
 
 # Create your views here.
 def home(request):
@@ -19,4 +19,11 @@ def post(request, id):
 	'''
 	Displays an the actual post retrieved by the ID of the post
 	'''
-	return HttpResponse('Hello World!')
+	try:
+		p = Post.objects.get(id=id)
+		post_tags = p.tags.all()
+	except:
+		# In case someone tries a random number
+		return render(request, 'page_unknown.html')
+
+	return render(request, 'post.html', {'post': p, 'tags': post_tags})

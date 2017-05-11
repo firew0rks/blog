@@ -1,8 +1,0 @@
-{% for p in posts %}
-	<h1><a href="{% url post.post_detail %}/{{post.pk}}">{{ p.title }}</a></h1>
-	<subtitle>Author: {{ p.author }}, {{ p.updated }}</subtitle>
-
-	<p>{{ p.sample_text }}</p>
-
-	<br>
-{% endfor %}

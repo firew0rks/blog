@@ -9,6 +9,7 @@ class PostTag(models.Model):
 # Create your models here.
 class Post(models.Model):
 	title = models.CharField(max_length=50)
+	image = models.ImageField(upload_to='upload', blank=True, null=True)
 	author = models.CharField(max_length=20)
 	text = models.TextField()
 	created = models.DateTimeField(auto_now_add=True)
