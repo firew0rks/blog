@@ -1,5 +1,36 @@
 from __future__ import unicode_literals
 
+from django.contrib.auth.models import User
 from django.db import models
 
+
 # Create your models here.
+class Tag(models.Model):
+    tag = models.SlugField(max_length=20)
+
+    def __str__(self):
+        return self.tag
+
+
+class Article(models.Model):
+    title = models.CharField(max_length=100)
+    location = models.CharField()
+    author = models.ForeignKey(User)
+    url = models.SlugField(max_length=20)
+    tags = models.ManyToManyField(Tag)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now_add=True)
+    version = models.FloatField(default=0)
+
+    def save(self, *args, **kwargs):
+        save_type = kwargs.pop("save_type")
+
+        # Incrementing based on whether save was a major revision or minor revision
+        self.version += 1.0 if save_type == 1 else 0.1
+
+        super(self, Article).save(*args, **kwargs)
+
+# For Robogals
+# @property
+# def chapter(self):
+#     return self.author.chapter

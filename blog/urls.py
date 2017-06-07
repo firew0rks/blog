@@ -32,7 +32,3 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-if settings.DEBUG:
-    urlpatterns += [
-        url(r'^static/(?P<path>.*)$', static_views.serve),
-    ]
