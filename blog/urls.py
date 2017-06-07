@@ -17,6 +17,8 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.staticfiles import views as static_views
+
 from blog.posts import views
 
 urlpatterns = [
@@ -24,7 +26,13 @@ urlpatterns = [
     # url(r'^', include('blog.posts.urls'), namespace='posts'),
     url(r'^$', views.home),
     url(r'^post/', include('blog.posts.urls', namespace='post')),
+    url(r'^wiki/', include('blog.wiki.urls', namespace='wiki')),
 ]
 
 if settings.DEBUG:
-	urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += [
+        url(r'^static/(?P<path>.*)$', static_views.serve),
+    ]

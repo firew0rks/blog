@@ -1,6 +1,6 @@
 {% for p in posts %}
 	<h1><a href="{% url 'post:post_detail' p.id %}">{{ p.title }}</a></h1>
-    <img src="{{ p.image.url }}"/>{{ p.image }} {{ MEDIA_URL }}
+    
 	<subtitle>Author: {{ p.author }}, {{ p.updated }}</subtitle>
 
 	<p>{{ p.sample_text }}</p>

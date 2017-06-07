@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {{ toc|safe }}
+    {{ text|safe }}
+
+
+    <script>
+        var toc = document.getElementsByClassName("toc");
+        toc.className += "list-group";
+    </script>
+{% endblock %}

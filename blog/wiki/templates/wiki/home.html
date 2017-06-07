@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %} Home {% endblock %}
+
+{% block content %}
+        <div class="page-header">
+            <h1><i class="fa fa-ravelry" aria-hidden="true"></i> Welcome to my thoughts! <i class="fa fa-ravelry" aria-hidden="true"></i></h1>
+        </div>
+        <div class="col-lg-2"></div>
+        <div class="col-lg-8">
+            <p class="lead">So I created this to store all my knowledge, pretty crazy place... </p>
+
+            <p class="lead">Search for a thought:</p>
+            <form action="" method="GET">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search for... (tags)">
+
+                    <span class="input-group-btn">
+                    <button class="btn btn-default" type="button"><i class="fa fa-search"
+                                                                     aria-hidden="true"></i></button>
+                </span>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-2"></div>
+{% endblock %}
