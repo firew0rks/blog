@@ -3,7 +3,9 @@ import logging
 
 from django.shortcuts import render
 
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, CreateView, FormView
+
+from blog.wiki.forms import UploadForm
 
 logger = logging.getLogger('django.request')
 
@@ -22,4 +24,10 @@ def article_view(request):
         return render(request, 'wiki/article.html', {'text': html, 'toc': md.toc})
 
 
-class UploadView(TemplateView):
+class UploadView(FormView):
+    template_name = 'wiki/upload.html'
+    form_class = UploadForm()
+    success_url = '/wiki/'
+
+    def get_context_data(self, **kwargs):
+        return {'form': self.get_form()}
