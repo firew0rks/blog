@@ -1,11 +1,18 @@
+import datetime
+import os
+
 import markdown
 import logging
 
+from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 
 from django.views.generic import TemplateView, CreateView, FormView
 
 from blog.wiki.forms import UploadForm
+from blog.wiki.models import Article
 
 logger = logging.getLogger('django.request')
 
@@ -14,20 +21,59 @@ def home(request):
     return render(request, 'wiki/home.html')
 
 
-def article_view(request):
-    with open('Django Notes.md', 'rU') as f:
+def article_view(request, slug):
+    print(slug)
+    try:
+        a = Article.objects.get(url=slug)
+    except:
+        # Article does not exist
+        print('here')
+        HttpResponseRedirect(reverse('article_invalid'))
+
+    path = os.path.join(os.path.dirname(__file__), a.location)
+    print('article found')
+    with open(path, 'rU') as f:
         text_string = f.read()
         md = markdown.Markdown(extensions=['markdown.extensions.toc'])
         html = md.convert(text_string)
-
+        print('rendered')
         # TODO: Render toc nicely without bullet points
         return render(request, 'wiki/article.html', {'text': html, 'toc': md.toc})
 
 
 class UploadView(FormView):
     template_name = 'wiki/upload.html'
-    form_class = UploadForm()
+    form_class = UploadForm
     success_url = '/wiki/'
+    success_message = 'Successfully uploaded markdown document'
 
-    def get_context_data(self, **kwargs):
-        return {'form': self.get_form()}
+    # Form valid occurs after is_valid is checked in a post request
+    def form_valid(self, form):
+        """
+        Overriding form_valid method to save files to a particular location
+        """
+
+        # Filling out information for the article
+        a = Article()
+        a.author = self.request.user
+        a.date_created = datetime.datetime.now()
+        a.date_modified = datetime.datetime.now()
+
+        # Filling out information from form
+        a.url = form.cleaned_data['slug']
+        # TODO: Tags
+
+        # Obtaining the uploaded file
+        file = self.request.FILES['article']
+
+        tmp_path = os.path.join(os.path.dirname(__file__), 'article/%s.md' % a.url)
+        with open(tmp_path, 'w+') as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+
+        a.location = 'article/%s.md' % a.url
+        a.save(version=1)
+
+        return super(UploadView, self).form_valid(form)
+
+

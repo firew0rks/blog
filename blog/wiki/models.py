@@ -23,9 +23,9 @@ class Article(models.Model):
     version = models.FloatField(default=0)
 
     def save(self, *args, **kwargs):
-        save_type = kwargs.pop('save_type')
+        version = kwargs.pop('version')
 
         # Incrementing based on whether save was a major revision or minor revision
-        self.version += 1.0 if save_type == 1 else 0.1
+        self.version += 1.0 if version == 1 else 0.1
 
-        super(self, Article).save(*args, **kwargs)
+        return super(Article, self).save(*args, **kwargs)
