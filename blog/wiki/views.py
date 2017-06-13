@@ -1,17 +1,15 @@
 import datetime
+import logging
 import os
 
 import markdown
-import logging
-
-from django.conf import settings
+from django.contrib import messages
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse
+from django.views.generic import FormView, ListView
 
-from django.views.generic import TemplateView, CreateView, FormView, ListView
-
-from blog.wiki.forms import UploadForm
+from blog.wiki.forms import UploadForm, CreateForm
 from blog.wiki.models import Article
 
 logger = logging.getLogger('django.request')
@@ -90,3 +88,13 @@ class UploadView(FormView):
         return super(UploadView, self).form_valid(form)
 
 
+class CreateView(FormView):
+    template_name = 'wiki/create.html'
+    form_class = CreateForm
+    success_url = '/wiki/'
+
+    def form_valid(self, form):
+
+        # Redirects user to success url
+        messages.success(self.request, 'New Article Created!')
+        return super(CreateView, self).form_valid(form)

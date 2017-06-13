@@ -1,25 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %} <i class="fa fa-ravelry" aria-hidden="true"></i> Welcome to my thoughts! <i class="fa fa-ravelry" aria-hidden="true"></i> {% endblock %}
+{% block title %} <i class="fa fa-ravelry" aria-hidden="true"></i> Welcome to my thoughts!
+    <i class="fa fa-ravelry" aria-hidden="true"></i> {% endblock %}
 
 {% block content %}
-        <div class="col-lg-2"></div>
-        <div class="col-lg-8">
-            <p class="lead">So I created this to store all my knowledge, pretty crazy place... </p>
+    <div class="col-lg-2"></div>
+    <div class="col-lg-8">
+        <p class="lead">So I created this to store all my knowledge, pretty crazy place... </p>
 
-            <p class="lead">Search for a thought:</p>
-            <form action="/wiki/search/" method="GET">
-                <div class="input-group">
-{#                    <input type="text" class="form-control" placeholder="Search for... (tags)" name="search">#}
-{##}
-{#                    <span class="input-group-btn">#}
-{#                    <button class="btn btn-default" type="submit" ><i class="fa fa-search" aria-hidden="true"></i></button>#}
+        <p class="lead">Search for a thought:</p>
+        <form action="/wiki/search/" method="GET">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search for... (tags)" name="search">
 
-{#                </span>#}
-                    <input type="text" name="search" />
-                    <input type="submit" value="submit" />
-                </div>
-            </form>
-        </div>
-        <div class="col-lg-2"></div>
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>
+
+                </span>
+            </div>
+        </form>
+    </div>
+    <div class="col-lg-2"></div>
 {% endblock %}

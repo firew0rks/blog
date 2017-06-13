@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,11 +11,11 @@
     <title>Sticky Footer Navbar Template for Bootstrap</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="/media/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="{% static "base/css/bootstrap.min.css" %}" rel="stylesheet"/>
     <!-- Custom styles for this template -->
-    <link href="/media/css/sticky-footer-navbar.css" rel="stylesheet">
+    <link href="{% static "base/css/sticky-footer-navbar.css" %}" rel="stylesheet">
     <!-- Font awesome styles -->
-    <link href="/media/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="{% static "base/font-awesome/css/font-awesome.min.css" %}" rel="stylesheet">
 
 </head>
 
@@ -75,6 +77,6 @@
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
-<script src="/media/js/bootstrap.min.js"></script>
+<script src="/static/base/js/bootstrap.min.js"></script>
 </body>
 </html>

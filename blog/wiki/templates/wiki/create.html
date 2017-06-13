@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %} Create Wiki Article {% endblock %}
+
+{% block content %}
+    <p><b>{{ form.title.label }}:</b> {{ form.title }}</p>
+    <p><b>{{ form.slug.label }}:</b> {{ form.slug }}</p>
+    <p><b>{{ form.tags.label }}:</b> {{ form.tags }}</p>
+    <p>{{ form.article }}</p>
+    {{ form.media }}
+{% endblock %}
+
