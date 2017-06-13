@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from django.views.generic import TemplateView, CreateView, FormView
+from django.views.generic import TemplateView, CreateView, FormView, ListView
 
 from blog.wiki.forms import UploadForm
 from blog.wiki.models import Article
@@ -22,23 +22,35 @@ def home(request):
 
 
 def article_view(request, slug):
-    print(slug)
+    """
+    Renders the markdown article into HTML and displays it
+    """
     try:
         a = Article.objects.get(url=slug)
     except:
         # Article does not exist
-        print('here')
         HttpResponseRedirect(reverse('article_invalid'))
 
     path = os.path.join(os.path.dirname(__file__), a.location)
-    print('article found')
     with open(path, 'rU') as f:
         text_string = f.read()
         md = markdown.Markdown(extensions=['markdown.extensions.toc'])
         html = md.convert(text_string)
-        print('rendered')
+
         # TODO: Render toc nicely without bullet points
         return render(request, 'wiki/article.html', {'text': html, 'toc': md.toc})
+
+
+class ArticleSearch(ListView):
+    template_name = 'wiki/search.html'
+    paginate_by = 10
+    context_object_name = 'article_list'
+
+    def get(self, *args, **kwargs):
+        keywords = self.request.GET.get('search')
+        self.queryset = Article.objects.filter(url__contains=keywords)
+        print(self.queryset.__len__())
+        return super(ArticleSearch, self).get(*args, **kwargs)
 
 
 class UploadView(FormView):
@@ -60,6 +72,7 @@ class UploadView(FormView):
         a.date_modified = datetime.datetime.now()
 
         # Filling out information from form
+        a.title = form.cleaned_data['title']
         a.url = form.cleaned_data['slug']
         # TODO: Tags
 

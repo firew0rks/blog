@@ -29,3 +29,7 @@ class Article(models.Model):
         self.version += 1.0 if version == 1 else 0.1
 
         return super(Article, self).save(*args, **kwargs)
+
+    @property
+    def preview_text(self):
+        return 'This is the preview text'
