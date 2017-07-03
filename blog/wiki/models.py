@@ -13,8 +13,9 @@ class Tag(models.Model):
 
 
 class Article(models.Model):
-    title = models.CharField(max_length=100)
-    location = models.CharField(max_length=100)
+    title = models.CharField(max_length=100, default="")
+    location = models.CharField(max_length=100, default="")
+    preview_text = models.CharField(max_length=250, default="")
     author = models.ForeignKey(User)
     url = models.SlugField(max_length=20)
     tags = models.ManyToManyField(Tag)
@@ -29,7 +30,3 @@ class Article(models.Model):
         self.version += 1.0 if version == 1 else 0.1
 
         return super(Article, self).save(*args, **kwargs)
-
-    @property
-    def preview_text(self):
-        return 'This is the preview text'

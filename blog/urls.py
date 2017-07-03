@@ -23,7 +23,7 @@ from blog.posts import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^$', views.home),
+    url(r'^$', views.home, name='home'),
     url(r'^post/', include('blog.posts.urls', namespace='post')),
     url(r'^wiki/', include('blog.wiki.urls', namespace='wiki')),
     url(r'^markdownx/', include('markdownx.urls')),

@@ -4,7 +4,7 @@ from markdownx.fields import MarkdownxFormField
 
 class BaseArticleForm(forms.Form):
     title = forms.CharField(max_length=100)
-    slug = forms.SlugField()
+    slug = forms.SlugField(help_text="*This field will automatically fill in once you've entered a title")
     tags = forms.CharField(required=False)
 
 

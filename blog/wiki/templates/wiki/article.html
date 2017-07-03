@@ -1,7 +1,15 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block header %}
+    <link href="{% static 'wiki/css/article.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
 
 {% block content %}
-    {{ toc|safe }}
+    <div class="table-of-contents">
+        {{ toc|safe }}
+    </div>
     {{ text|safe }}
 
 

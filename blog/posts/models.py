@@ -25,3 +25,12 @@ class Post(models.Model):
 			return self.text[0:50] + '...'
 
 		return self.text[0:50]
+
+
+class BaseModel(models.Model):
+	title = models.CharField(max_length=100)
+	text = models.TextField()
+
+
+class NextModel(BaseModel):
+	abstract = models.CharField(max_length=100)

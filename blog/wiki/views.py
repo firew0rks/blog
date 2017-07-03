@@ -3,14 +3,17 @@ import logging
 import os
 
 import markdown
+import re
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import FormView, ListView
 
 from blog.wiki.forms import UploadForm, CreateForm
-from blog.wiki.models import Article
+from blog.wiki.models import Article, Tag
 
 logger = logging.getLogger('django.request')
 
@@ -34,21 +37,30 @@ def article_view(request, slug):
         text_string = f.read()
         md = markdown.Markdown(extensions=['markdown.extensions.toc'])
         html = md.convert(text_string)
+        toc = md.toc
 
-        # TODO: Render toc nicely without bullet points
-        return render(request, 'wiki/article.html', {'text': html, 'toc': md.toc})
+        print(toc)
+        # Render toc nicely using bootstrap
+
+        return render(request, 'wiki/article.html', {'text': html, 'toc': toc})
 
 
-class ArticleSearch(ListView):
+class SearchView(ListView):
     template_name = 'wiki/search.html'
     paginate_by = 10
     context_object_name = 'article_list'
 
     def get(self, *args, **kwargs):
         keywords = self.request.GET.get('search')
-        self.queryset = Article.objects.filter(url__contains=keywords)
-        print(self.queryset.__len__())
-        return super(ArticleSearch, self).get(*args, **kwargs)
+        # TODO: Multiple keyword searches
+
+        self.queryset = Article.objects.filter(
+            Q(url__icontains=keywords) |
+            Q(title__icontains=keywords) |
+            Q(tags__tag__icontains=keywords)
+        ).distinct()
+
+        return super(SearchView, self).get(*args, **kwargs)
 
 
 class UploadView(FormView):
@@ -72,7 +84,7 @@ class UploadView(FormView):
         # Filling out information from form
         a.title = form.cleaned_data['title']
         a.url = form.cleaned_data['slug']
-        # TODO: Tags
+        # TODO: Implement tags for upload view
 
         # Obtaining the uploaded file
         file = self.request.FILES['article']
@@ -82,19 +94,71 @@ class UploadView(FormView):
             for chunk in file.chunks():
                 f.write(chunk)
 
-        a.location = 'article/%s.md' % a.url
+        a.location = ('article/%s.md' % a.url)
         a.save(version=1)
 
         return super(UploadView, self).form_valid(form)
 
 
 class CreateView(FormView):
+    # TODO: Implement ajax-based save & continue
     template_name = 'wiki/create.html'
     form_class = CreateForm
     success_url = '/wiki/'
 
-    def form_valid(self, form):
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+
+        # Grabbing all the tag values
+        tags = [value for name, value in request.POST.iteritems() if name.startswith('n_')]
+
+        if form.is_valid():
+            return self.form_valid2(form, tags)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid2(self, form, tags):
+        a = Article()
+
+        a.author = self.request.user
+        a.created = datetime.datetime.now()
+        a.modified = datetime.datetime.now()
+
+        a.title = form.cleaned_data['title']
+        a.url = form.cleaned_data['slug']
+
+        # String containing the wiki article
+        article = form.cleaned_data['article']
+
+        tmp_path = os.path.join(os.path.dirname(__file__), 'article/%s.md' % a.url)
+        # TODO: Write a parser that saves title information, and preview text (first 200 characters)
+        with open(tmp_path, 'w+') as f:
+            f.write(article)
+
+        a.location = ('article/%s.md' % a.url)
+
+        # Generating preview text from text between <p>...</p> elements
+        html = markdown.markdown(article)
+        text = re.findall('<p>(.+)</p>', html)
+        text = ' '.join(text)
+        a.preview_text = text[:200] + '...'
+
+        # Saving reference of article to database
+        a.save(version=1)
+
+        # Associating tags with the article
+        for t in tags:
+            try:
+                tt = Tag.objects.get(tag__iexact=t)
+            except ObjectDoesNotExist:
+                tt = Tag(tag=t)
+                tt.save()
+
+            a.tags.add(tt)
+
+        a.save(version=1)
 
         # Redirects user to success url
         messages.success(self.request, 'New Article Created!')
-        return super(CreateView, self).form_valid(form)
+        return self.form_valid(form)
+
