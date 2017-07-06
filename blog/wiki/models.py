@@ -9,7 +9,7 @@ class Tag(models.Model):
     tag = models.SlugField(max_length=20)
 
     def __str__(self):
-        return self.tag
+        return str(self.tag)
 
 
 class Article(models.Model):
@@ -21,12 +21,9 @@ class Article(models.Model):
     tags = models.ManyToManyField(Tag)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now_add=True)
-    version = models.FloatField(default=0)
+    revision = models.IntegerField(default=0)
 
     def save(self, *args, **kwargs):
-        version = kwargs.pop('version')
-
-        # Incrementing based on whether save was a major revision or minor revision
-        self.version += 1.0 if version == 1 else 0.1
-
+        # Incrementing revision on every save
+        self.revision += 1
         return super(Article, self).save(*args, **kwargs)

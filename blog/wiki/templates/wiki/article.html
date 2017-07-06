@@ -6,15 +6,48 @@
     <link href="{% static 'wiki/css/article.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
+{% block title %}
+    {{ title }}
+{% endblock %}
+
 {% block content %}
-    <div class="table-of-contents">
+    <div >
+        <div style="text-align: left;">
+            <img src="/media/upload/dp.jpg" width="20px" height="20px">
+            <img src="/media/upload/dp.jpg" width="20px" height="20px">
+            <img src="/media/upload/dp.jpg" width="20px" height="20px">
+            <img src="/media/upload/dp.jpg" width="20px" height="20px">
+            <br>
+            <a href="#" style="font-size: 12px;" > See all Contributors </a>
+
+            <div style="float: right;">
+                <form action="edit/" method="GET">
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-pencil" aria-hidden="true"></i> Edit Article</button>
+                </form>
+
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-cog" aria-hidden="true"></i> <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#"><i class="fa fa-clock-o" aria-hidden="true"></i> Changelogs</a></li>
+                        <li><a href="#"><i class="fa fa-print" aria-hidden="true"></i> Print to PDF</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default" >
+    <div class="panel-heading">Table of Contents</div>
+    <div class="panel-body">
         {{ toc|safe }}
     </div>
+        </div>
     {{ text|safe }}
 
-
-    <script>
-        var toc = document.getElementsByClassName("toc");
-        toc.className += "list-group";
-    </script>
+    Last edited by: XXX
+    Last modified: XXX
+    Version: X.XX
 {% endblock %}

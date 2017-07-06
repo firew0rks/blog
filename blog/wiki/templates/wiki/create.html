@@ -19,10 +19,17 @@
         </div>
 
         <div class="form-group {% if form.slug.errors %}has-error{% endif %}">
+            {% for err in form.slug.errors %}
+                {{ err }}
+            {% endfor %}
             <label class="col-sm-1 control-label">{{ form.slug.label }}*:</label>
             <div class="col-sm-4">
+                {% if edit %}
+                {{ form.slug|add_class:"form-control"|attr:"disabled"}}
+                {% else %}
                 {{ form.slug|add_class:"form-control"}}
                 <span id="helpBlock" class="help-block" style="font-size: 12px;">{{ form.slug.help_text }}</span>
+                {% endif %}
             </div>
         </div>
 
@@ -32,8 +39,7 @@
                 {{ form.tags|add_class:"form-control" }}
             </div>
             <div class="col-sm-6" id="tags">
-                <span>php</span>
-                <span>jquery</span>
+                {{ tags|safe }}
             </div>
         </div>
 

@@ -14,3 +14,9 @@ class UploadForm(BaseArticleForm):
 
 class CreateForm(BaseArticleForm):
     article = MarkdownxFormField()
+
+
+class EditForm(CreateForm):
+    def clean_slug(self):
+        if self.instance.slug != self.cleaned_data['slug']:
+            raise forms.ValidationError("The slug field cannot be changed in edit mode")
