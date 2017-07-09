@@ -41,3 +41,7 @@ textarea {
 #tags > span:hover{
   opacity:0.8;
 }
+
+#alert-bar {
+    display: none;
+}

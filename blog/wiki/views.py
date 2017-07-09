@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import os
 
@@ -8,13 +9,14 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.views.generic import FormView, ListView
 
 from blog.wiki.forms import UploadForm, CreateForm, EditForm
 from blog.wiki.models import Article, Tag
 
+# TODO: Implement logging for production
 logger = logging.getLogger('django.request')
 
 
@@ -26,6 +28,7 @@ def article_view(request, slug):
     """
     Renders the markdown article into HTML and displays it
     """
+    # TODO: Tags in article view
     try:
         a = Article.objects.get(url=slug)
     except:
@@ -94,7 +97,12 @@ class UploadView(FormView):
     template_name = 'wiki/upload.html'
     form_class = UploadForm
     success_url = '/wiki/'
-    success_message = 'Successfully uploaded markdown document'
+    tags = []
+
+    def post(self, request, *args, **kwargs):
+        # Grabbing all the tag values
+        self.tags = [value for name, value in request.POST.iteritems() if name.startswith('n_')]
+        return super(UploadView, self).post(self, request, *args, **kwargs)
 
     # Form valid occurs after is_valid is checked in a post request
     def form_valid(self, form):
@@ -111,25 +119,59 @@ class UploadView(FormView):
         # Filling out information from form
         a.title = form.cleaned_data['title']
         a.url = form.cleaned_data['slug']
-        # TODO: Implement tags for upload view
 
         # Obtaining the uploaded file
-        file = self.request.FILES['article']
+        file = self.request.FILES['file']
 
         tmp_path = os.path.join(os.path.dirname(__file__), 'article/%s.md' % a.url)
-        with open(tmp_path, 'w+') as f:
+        with open(tmp_path, 'wb+') as f:
             for chunk in file.chunks():
                 f.write(chunk)
 
+        # TODO: Preview text
         a.location = ('article/%s.md' % a.url)
-        a.save(version=1)
+        a.save()
 
+        edit_tags(a, self.tags)
+        a.save()
+
+        messages.success(self.request, 'Successfully uploaded %s' % a.title)
         return super(UploadView, self).form_valid(form)
 
 
+def write_article(article_obj, article):
+    tmp_path = os.path.join(os.path.dirname(__file__), 'article/%s.md' % article_obj.url)
+    with open(tmp_path, 'wb') as f:
+        f.write(article)
+    article_obj.location = ('article/%s.md' % article_obj.url)
+
+    # Generating preview text from text between <p>...</p> elements
+    html = markdown.markdown(article)
+    text = re.findall('<p>(.+)</p>', html)
+    text = ' '.join(text)
+    article_obj.preview_text = text[:250] + '...'
+
+
+def edit_tags(a, tags):
+    # Removing previous tag entries
+    for dict in a.tags.values():
+        for key, value in dict.iteritems():
+            if key == 'id':
+                curr_tag = Tag.objects.get(id=value)
+                a.tags.remove(curr_tag)
+
+    # Associating tags with the article
+    for t in tags:
+        try:
+            tt = Tag.objects.get(tag__iexact=t)
+        except ObjectDoesNotExist:
+            tt = Tag(tag=t)
+            tt.save()
+
+        a.tags.add(tt)
+
+
 class CreateView(FormView):
-    # TODO: Implement ajax-based save & continue
-    # TODO: Find out why there are so many new lines when writing to file
     template_name = 'wiki/create.html'
     form_class = CreateForm
     success_url = '/wiki/'
@@ -163,21 +205,12 @@ class CreateView(FormView):
             a.url = form.cleaned_data['slug']
 
         # String containing the wiki article
-        write_article(a, form)
+        write_article(a, form.cleaned_data['article'])
 
         # Saving reference of article to database
         a.save()
 
-        # Associating tags with the article
-        for t in tags:
-            try:
-                tt = Tag.objects.get(tag__iexact=t)
-            except ObjectDoesNotExist:
-                tt = Tag(tag=t)
-                tt.save()
-
-            a.tags.add(tt)
-
+        edit_tags(a, tags)
         a.save()
 
         # Redirects user to success url
@@ -192,7 +225,7 @@ class EditView(FormView):
     """
 
     template_name = 'wiki/create.html'
-    form_class = EditForm
+    form_class = CreateForm
     success_url = '/wiki/'
     failure_url = '/wiki/'
 
@@ -251,28 +284,12 @@ class EditView(FormView):
 
         a.title = form.cleaned_data['title']
         a.modified = datetime.datetime.now()
+
         # TODO: Add contributor list here
 
-        write_article(a, form)
+        write_article(a, form.cleaned_data['article'])
+        edit_tags(a, tags)
 
-        # Removing previous tag entries
-        for dict in a.tags.values():
-            for key, value in dict.iteritems():
-                if key == 'id':
-                    curr_tag = Tag.objects.get(id=value)
-                    a.tags.remove(curr_tag)
-
-        # Associating tags with the article
-        for t in tags:
-            try:
-                tt = Tag.objects.get(tag__iexact=t)
-            except ObjectDoesNotExist:
-                tt = Tag(tag=t)
-                tt.save()
-
-            a.tags.add(tt)
-
-        # Save article
         a.save()
 
         messages.success(self.request, '%s has been successfully edited' % a.title)
@@ -282,17 +299,25 @@ class EditView(FormView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-def write_article(a, form):
-    # String containing the wiki article
-    article = form.cleaned_data['article']
-    tmp_path = os.path.join(os.path.dirname(__file__), 'article/%s.md' % a.url)
-    with open(tmp_path, 'w+') as f:
-        return None
-        f.write(article)
-    a.location = ('article/%s.md' % a.url)
+def save_and_continue(request, slug):
+    if request.method == "POST":
+        try:
+            a = Article.objects.get(url=slug)
+        except ObjectDoesNotExist:
+            print("ObjectDoesNotExist")
+            response = HttpResponse(json.dumps({"message": "Cats are in space!"}), content_type="application/json")
+            response.status_code = 400
+            return response
 
-    # Generating preview text from text between <p>...</p> elements
-    html = markdown.markdown(article)
-    text = re.findall('<p>(.+)</p>', html)
-    text = ' '.join(text)
-    a.preview_text = text[:200] + '...'
+        title = request.POST.get("title")
+        article = request.POST.get("article")
+        tags = request.POST.getlist("tags[]")
+
+        a.title = title
+        write_article(a, article)
+        edit_tags(a, tags)
+
+        a.save()
+
+        response_data = {'is_successful': True}
+        return HttpResponse(json.dumps(response_data), content_type="application/json")

@@ -1,5 +1,4 @@
 // https://stackoverflow.com/questions/14083272/how-to-make-a-tags-box-using-jquery-with-text-input-field-tags-separated-by
-
 $(function(){ // DOM ready
 
   // ::: TAGS BOX
@@ -24,11 +23,9 @@ $(function(){ // DOM ready
       $(this).remove();
   });
 
+
 // https://stackoverflow.com/questions/3142990/jquery-replace-inputs-with-spans
-
-
   $("#save-form").click(function() {
-      console.log("here");
       $("#create-form").find("#tags span").each(function() {
           $(this).replaceWith("<input type=hidden name=\"n_" + this.textContent + "\" value=\"" + this.textContent + "\" />");
       })

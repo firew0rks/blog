@@ -21,7 +21,7 @@ class Article(models.Model):
     tags = models.ManyToManyField(Tag)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now_add=True)
-    revision = models.IntegerField(default=0)
+    revision = models.IntegerField(default=-1)
 
     def save(self, *args, **kwargs):
         # Incrementing revision on every save

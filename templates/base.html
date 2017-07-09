@@ -48,25 +48,21 @@
                 {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
                     <div class="alert alert-success" role="alert">
                         <strong>Success</strong>
-                    </div>
                 {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
                     <div class="alert alert-danger" role="alert">
                         <strong>Error</strong>
-                    </div>
                 {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
                     <div class="alert alert-warning" role="alert">
                         <strong>Warning</strong>
-                    </div>
                 {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
                     <div class="alert alert-info" role="alert">
                         <strong>Info</strong>
-                    </div>
                 {% elif message.level == DEFAULT_MESSAGE_LEVELS.DEBUG %}
                     <div class="alert alert-link" role="alert">
                         <strong>Debug</strong>
-                    </div>
                 {% endif %}
-                 {{ message }}
+                        {{ message }}
+                    </div>
             {% endfor %}
         </div>
     {% endif %}
